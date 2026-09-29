@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Saurav Shiksha Sankalp | Admin</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f3f6fb;color:#172033}
+header{background:#1255a5;color:#fff;padding:16px;text-align:center}
+.container{max-width:900px;margin:auto;padding:20px}
+.box,.post{background:#fff;border-radius:14px;padding:20px;margin:16px 0;box-shadow:0 3px 14px #0001}
+input,textarea,select{width:100%;padding:12px;margin:7px 0 14px;border:1px solid #ccd5e0;border-radius:8px;font-size:16px}
+button{border:0;border-radius:8px;padding:11px 17px;background:#1255a5;color:#fff;font-weight:bold;margin:4px;cursor:pointer}
+.danger{background:#c62828}.edit{background:#e38b00}.hidden{display:none}.tag{color:#1255a5;font-weight:bold}
+.post h3{margin:5px 0}.post small{color:#687386}
+#site{background:linear-gradient(135deg,#e8f2ff,#fff);padding:25px;border-radius:14px}
+</style>
+</head>
+<body>
+<header><h2>📚 Saurav Shiksha Sankalp</h2><p>Admin Panel</p></header>
+<div class="container">
+
+<div id="login" class="box">
+<h2>🔐 Admin Login</h2>
+<label>Username</label><input id="user" placeholder="Username">
+<label>Password</label><input id="pass" type="password" placeholder="Password">
+<button onclick="login()">Login</button>
+<p id="err" style="color:#c62828"></p>
+</div>
+
+<div id="dashboard" class="hidden">
+<div class="box">
+<h2>➕ नया पोस्ट</h2>
+<label>Category</label>
+<select id="cat"><option>Study</option><option>MCQ</option><option>Mechanical Engineering</option><option>Career & Jobs</option><option>Motivation</option><option>Scholarship</option></select>
+<label>Title</label><input id="title" placeholder="पोस्ट का शीर्षक">
+<label>Content</label><textarea id="content" rows="5" placeholder="पोस्ट लिखें..."></textarea>
+<button onclick="savePost()">पोस्ट प्रकाशित करें</button>
+<button class="edit" onclick="clearForm()">Clear</button>
+<input type="hidden" id="editId">
+</div>
+
+<div class="box">
+<h2>📝 आपकी पोस्ट</h2><div id="posts"></div>
+</div>
+
+<div class="box">
+<h2>🌐 Website Preview</h2>
+<div id="site"><h1>Saurav Shiksha Sankalp</h1><p>शिक्षा • मेहनत • सफलता</p><div id="publicPosts"></div></div>
+</div>
+<button class="danger" onclick="logout()">Logout</button>
+</div>
+</div>
+
+<script>
+const USER="admin", PASS="Saurav@123";
+let posts=JSON.parse(localStorage.getItem("sss_posts")||"[]");
+function login(){if(user.value===USER&&pass.value===PASS){loginDiv=document.getElementById("login");loginDiv.classList.add("hidden");document.getElementById("dashboard").classList.remove("hidden");render()}else err.textContent="Username या Password गलत है।";}
+function logout(){location.reload()}
+function savePost(){
+let t=title.value.trim(), c=content.value.trim(), category=cat.value;
+if(!t||!c){alert("Title और Content भरें");return}
+let id=editId.value;
+if(id){posts=posts.map(x=>x.id==id?{...x,title:t,content:c,category}:x)}
+else posts.unshift({id:Date.now(),title:t,content:c,category,date:new Date().toLocaleDateString("hi-IN")});
+localStorage.setItem("sss_posts",JSON.stringify(posts));clearForm();render();
+}
+function editPost(id){let x=posts.find(p=>p.id==id);title.value=x.title;content.value=x.content;cat.value=x.category;editId.value=id;scrollTo(0,0)}
+function deletePost(id){if(confirm("यह पोस्ट delete करें?")){posts=posts.filter(x=>x.id!=id);localStorage.setItem("sss_posts",JSON.stringify(posts));render()}}
+function clearForm(){title.value="";content.value="";editId.value=""}
+function render(){
+postsDiv=document.getElementById("posts");publicPosts=document.getElementById("publicPosts");
+postsDiv.innerHTML=posts.length?posts.map(x=>`<div class="post"><span class="tag">${x.category}</span><h3>${x.title}</h3><small>${x.date||""}</small><p>${x.content}</p><button class="edit" onclick="editPost(${x.id})">Edit</button><button class="danger" onclick="deletePost(${x.id})">Delete</button></div>`).join(""):"<p>अभी कोई पोस्ट नहीं है।</p>";
+publicPosts.innerHTML=posts.length?posts.map(x=>`<div class="post"><span class="tag">${x.category}</span><h3>${x.title}</h3><p>${x.content}</p></div>`).join(""):"<p>आपकी posts यहाँ दिखाई देंगी।</p>";
+}
+</script>
+</body></html>
